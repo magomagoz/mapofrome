@@ -11,7 +11,7 @@ st.write("Estrazione dati live da OpenStreetMap ottimizzata per iPad Pro.")
 
 # Centro di Roma (Piazza Venezia) e raggio controllato per non sovraccaricare la RAM
 centro_roma = (41.8955, 12.4823)
-raggio_metri = st.slider("Seleziona il raggio di estrazione (metri):", 500, 1500, 3000, 5000)
+raggio_metri = st.select_slider("Seleziona il raggio di estrazione (metri):", options=[500, 1000, 1500, 2000, 3000], value=500)
 
 @st.cache_data(show_spinner="Estrazione dati geospaziali in corso...")
 def genera_mappa_roma(centro, raggio):
