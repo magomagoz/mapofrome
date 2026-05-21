@@ -20,7 +20,7 @@ def genera_mappa_roma(centro, raggio):
     
     try:
         # 1. Scarica e disegna le vie principali
-        strade = ox.graph_from_point(centro, dist=raggio, network_type='drive')
+        strade = ox.graph_from_point(centro, dist=raggio_metri, network_type='drive')
         _, edges = ox.graph_to_gdfs(strade)
         folium.GeoJson(edges[['geometry']], name="Vie", color="#444444", weight=1, opacity=0.6).add_to(m)
     except Exception as e:
