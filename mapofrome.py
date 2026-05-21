@@ -11,11 +11,11 @@ st.write("Vediamo esattamente cosa sta succedendo dietro le quinte.")
 # --- 1. PANNELLO DI CONTROLLO CON TASTO RESET ---
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    mostra_hotel = st.toggle("🌟 Hotel (4 e 5 Stelle)", value=True)
+    mostra_hotel = st.toggle("🌟 Hotel (4 e 5 Stelle)", value=False)
 with col2:
-    mostra_chiese = st.toggle("⛪ Chiese", value=True)
+    mostra_chiese = st.toggle("⛪ Chiese", value=False)
 with col3:
-    mostra_monumenti = st.toggle("🏛️ Monumenti", value=True)
+    mostra_monumenti = st.toggle("🏛️ Monumenti", value=False)
 with col4:
     # Questo tasto è fondamentale per forzare il server a riscaricare i dati
     if st.button("🔄 Svuota Cache e Ricarica"):
@@ -30,7 +30,7 @@ if "bounds" not in st.session_state:
 if "center" not in st.session_state:
     st.session_state["center"] = [41.8955, 12.4823]
 if "zoom" not in st.session_state:
-    st.session_state["zoom"] = 15
+    st.session_state["zoom"] = 16
 
 # --- 3. ESTRAZIONE DATI CON MESSAGGI DI ERRORE ESPLICITI ---
 @st.cache_data(show_spinner="Download dati da OpenStreetMap...")
