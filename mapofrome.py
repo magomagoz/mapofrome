@@ -5,7 +5,7 @@ import os
 
 # 1. Centro di Roma (Piazza Venezia) e raggio di tolleranza (4 km coprono il centro storico)
 centro_roma = (41.8955, 12.4823)
-raggio_metri = 1000 
+raggio_metri = 100 
 
 print("Inizializzazione della mappa...")
 mappa_roma = folium.Map(location=centro_roma, zoom_start=14, tiles='CartoDB positron')
