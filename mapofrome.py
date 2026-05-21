@@ -1,74 +1,73 @@
 import streamlit as st
 import folium
-import osmnx as ox
 from streamlit_folium import st_folium
+import requests
 
 # Sfrutta lo schermo dell'iPad Pro al massimo
 st.set_page_config(layout="wide")
 
-st.title("🗺️ Mappa Dinamica di Roma")
-st.write("Spostati sulla mappa o fai zoom: i dati verranno scaricati automaticamente per l'area visibile.")
+st.title("🗺️ Mappa Rapida di Roma")
+st.write("Versione ottimizzata: spostati e zooma. Le strade si caricano istantaneamente, i punti seguono lo zoom.")
 
-# Inizializza le coordinate di partenza (Piazza Venezia) se l'utente non ha ancora interagito
+# Inizializza lo stato della mappa
 if "center" not in st.session_state:
     st.session_state["center"] = [41.8955, 12.4823]
 if "zoom" not in st.session_state:
-    st.session_state["zoom"] = 20
+    st.session_state["zoom"] = 18
 
-# Crea l'oggetto mappa base
+# Creiamo la mappa base. Usiamo il tile 'OpenStreetMap' o 'CartoDB voyager' 
+# che mostra già TUTTE le strade, i vicoli e i nomi delle vie in tempo reale e gratis.
 m = folium.Map(
     location=st.session_state["center"], 
     zoom_start=st.session_state["zoom"], 
-    tiles='CartoDB positron'
+    tiles='CartoDB voyager'
 )
 
-# Funzione per scaricare i dati nell'area visibile (Bounding Box) con cache per non saturare la RAM
-@st.cache_data(show_spinner="Aggiornamento dati cartografici per l'area visibile...")
-def scarica_dati_visibili(north, south, east, west):
-    collezione_elementi = []
-    strade_linee = None
+# Funzione turbo per scaricare SOLO i punti tramite richiesta HTTP diretta (senza OSMnx)
+@st.cache_data(show_spinner="Recupero hotel, chiese e monumenti in questa zona...")
+def scarica_punti_rapidi(north, south, east, west):
+    punti = []
     
-    # 1. Scarica la rete stradale dell'area visibile
+    # Query Overpass specifica per prendere solo ciò che serve nell'area visibile
+    overpass_url = "http://overpass-api.de/api/interpreter"
+    overpass_query = f"""
+    [out:json][timeout:10];
+    (
+      node["tourism"="hotel"]["stars"~"4|5"]({south},{west},{north},{east});
+      node["amenity"="place_of_worship"]({south},{west},{north},{east});
+      node["historic"="monument"]({south},{west},{north},{east});
+    );
+    out body;
+    """
+    
     try:
-        strade = ox.graph_from_bbox(bbox=(north, south, east, west), network_type='drive')
-        _, edges = ox.graph_to_gdfs(strade)
-        strade_linee = edges[['geometry']]
-    except Exception:
-        pass # Se l'area è troppo piccola o priva di strade, ignora l'errore
-
-    # 2. Scarica i punti di interesse
-    try:
-        tags = {'tourism': 'hotel', 'amenity': 'place_of_worship', 'historic': 'monument'}
-        elementi = ox.features_from_bbox(bbox=(north, south, east, west), tags=tags)
+        response = requests.get(overpass_url, params={'data': overpass_query})
+        data = response.json()
         
-        for idx, row in elementi.iterrows():
-            centroide = row.geometry.centroid if hasattr(row.geometry, 'centroid') else row.geometry
-            nome = row.get('name', 'Struttura senza nome')
-            tipo = None
+        for element in data.get('elements', []):
+            lat = element.get('lat')
+            lon = element.get('lon')
+            tags = element.get('tags', {})
+            nome = tags.get('name', 'Senza nome')
             
-            if row.get('tourism') == 'hotel' and row.get('stars') in ['4', '5']:
+            # Categorizzazione immediata
+            if tags.get('tourism') == 'hotel':
                 tipo = 'hotel'
-            elif row.get('amenity') == 'place_of_worship':
+            elif tags.get('amenity') == 'place_of_worship':
                 tipo = 'chiesa'
-            elif row.get('historic') == 'monument':
+            else:
                 tipo = 'monumento'
                 
-            if tipo:
-                collezione_elementi.append({
-                    'coords': [centroide.y, centroide.x],
-                    'nome': nome,
-                    'tipo': tipo
-                })
-    except Exception:
+            punti.append({'coords': [lat, lon], 'nome': nome, 'tipo': tipo})
+    except Exception as e:
         pass
         
-    return strade_linee, collezione_elementi
+    return punti
 
-# Mostra una mappa vuota al primissimo avvio per ottenere i confini dello schermo dello Streamlit
-# Altrimenti usiamo i confini della mappa calcolati dall'interazione dell'utente
-output_mappa = st_folium(m, width="100%", height=650, key="mappa_roma")
+# Mostra la mappa sull'iPad
+output_mappa = st_folium(m, width="100%", height=650, key="mappa_roma_veloce")
 
-# Controlla se l'utente ha mosso la mappa o fatto zoom (otteniamo i confini dello schermo)
+# Se l'utente si sposta, aggiorna i punti
 if output_mappa and output_mappa.get("bounds"):
     bounds = output_mappa["bounds"]
     south = bounds["_southWest"]["lat"]
@@ -76,30 +75,24 @@ if output_mappa and output_mappa.get("bounds"):
     north = bounds["_northEast"]["lat"]
     east = bounds["_northEast"]["lng"]
     
-    # Salva la posizione attuale per evitare che la mappa si resetti al rinfresco della pagina
+    # Salva la posizione per evitare rinfreschi molesti
     st.session_state["center"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
     st.session_state["zoom"] = output_mappa["zoom"]
     
-    # Calcola l'area per evitare di bloccare il server se l'utente zooma troppo indietro su tutta Italia
-    if abs(north - south) < 0.1 and abs(east - west) < 0.1:
+    # Limite di sicurezza per lo zoom indietro
+    if abs(north - south) < 0.05:
+        punti_visibili = scarica_punti_rapidi(north, south, east, west)
         
-        # Scarica strade e punti relativi solo a questo Bounding Box visibile
-        strade_visibili, punti_visibili = scarica_dati_visibili(north, south, east, west)
-        
-        # Disegna le strade aggiornate sulla mappa corrente
-        if strade_visibili is not None:
-            folium.GeoJson(strade_visibili, color="#444444", weight=1.5, opacity=0.7).add_to(m)
-            
-        # Posiziona i marker aggiornati
+        # Disegna i punti sulla mappa
         for p in punti_visibili:
             if p['tipo'] == 'hotel':
-                folium.CircleMarker(location=p['coords'], radius=5, color='gold', fill=True, popup=p['nome']).add_to(m)
+                folium.CircleMarker(location=p['coords'], radius=6, color='#FFD700', fill=True, fill_color='#FFD700', fill_opacity=0.9, popup=p['nome']).add_to(m)
             elif p['tipo'] == 'chiesa':
-                folium.CircleMarker(location=p['coords'], radius=4, color='crimson', fill=True, popup=p['nome']).add_to(m)
+                folium.CircleMarker(location=p['coords'], radius=5, color='#DC143C', fill=True, fill_color='#DC143C', fill_opacity=0.8, popup=p['nome']).add_to(m)
             elif p['tipo'] == 'monumento':
-                folium.CircleMarker(location=p['coords'], radius=4, color='royalblue', fill=True, popup=p['nome']).add_to(m)
-                
-        # Forza un rapido aggiornamento della mappa a schermo con i nuovi dati inclusi
+                folium.CircleMarker(location=p['coords'], radius=5, color='#1E90FF', fill=True, fill_color='#1E90FF', fill_opacity=0.8, popup=p['nome']).add_to(m)
+        
+        # Aggiorna l'app con i nuovi marker
         st.rerun()
     else:
-        st.info("🔍 Fai un po' di zoom in avanti per caricare i dettagli di questa zona.")
+        st.info("🔍 Zoomando più da vicino vedrai comparire gli hotel, le chiese e i monumenti di quella zona.")
