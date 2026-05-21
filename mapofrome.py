@@ -13,7 +13,7 @@ st.write("Spostati sulla mappa o fai zoom: i dati verranno scaricati automaticam
 if "center" not in st.session_state:
     st.session_state["center"] = [41.8955, 12.4823]
 if "zoom" not in st.session_state:
-    st.session_state["zoom"] = 14
+    st.session_state["zoom"] = 5
 
 # Crea l'oggetto mappa base
 m = folium.Map(
