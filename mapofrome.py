@@ -67,17 +67,17 @@ def scarica_punti_rapidi(north, south, east, west):
 # Mostra la mappa sull'iPad
 output_mappa = st_folium(m, width="100%", height=650, key="mappa_roma_veloce")
 
-# Se l'utente si sposta, aggiorna i punti
-if output_mappa and output_mappa.get("bounds"):
+# Controlla che output_mappa contenga SIA i confini (bounds) SIA il centro (center)
+if output_mappa and output_mappa.get("bounds") and output_mappa.get("center"):
     bounds = output_mappa["bounds"]
     south = bounds["_southWest"]["lat"]
     west = bounds["_southWest"]["lng"]
     north = bounds["_northEast"]["lat"]
     east = bounds["_northEast"]["lng"]
     
-    # Salva la posizione per evitare rinfreschi molesti
+    # Ora questa riga è sicura al 100% perché sappiamo che "center" esiste
     st.session_state["center"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
-    st.session_state["zoom"] = output_mappa["zoom"]
+    st.session_state["zoom"] = output_mappa.get("zoom", 15)
     
     # Limite di sicurezza per lo zoom indietro
     if abs(north - south) < 0.05:
