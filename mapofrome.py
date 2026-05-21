@@ -1,4 +1,4 @@
-import streamlit as str
+import streamlit as st
 import folium
 import osmnx as ox
 import streamlit.components.v1 as components
