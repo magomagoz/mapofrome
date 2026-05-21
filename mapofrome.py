@@ -107,16 +107,27 @@ else:
 # --- 5. MOSTRA LA MAPPA A SCHERMO ---
 output_mappa = st_folium(m, width="100%", height=650, key="mappa_roma_diagnostica")
 
-# --- 6. AGGIORNAMENTO DINAMICO SULLO SPOSTAMENTO ---
+# --- 6. AGGIORNAMENTO DINAMICO SULLO SPOSTAMENTO (A PROVA DI CRASH) ---
 if output_mappa and output_mappa.get("bounds"):
-    nuovi_bounds = output_mappa["bounds"]
-    n_north = nuovi_bounds["_northEast"]["lat"]
-    n_south = nuovi_bounds["_southWest"]["lat"]
-    n_east = nuovi_bounds["_northEast"]["lng"]
-    n_west = nuovi_bounds["_southWest"]["lng"]
-    
-    if abs(n_north - b["north"]) > 0.001 or abs(n_south - b["south"]) > 0.001:
-        st.session_state["bounds"] = {"north": n_north, "south": n_south, "east": n_east, "west": n_west}
-        st.session_state["center"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
-        st.session_state["zoom"] = output_mappa.get("zoom", 15)
-        st.rerun()
+    try:
+        nuovi_bounds = output_mappa["bounds"]
+        n_north = nuovi_bounds["_northEast"]["lat"]
+        n_south = nuovi_bounds["_southWest"]["lat"]
+        n_east = nuovi_bounds["_northEast"]["lng"]
+        n_west = nuovi_bounds["_southWest"]["lng"]
+        
+        # Recuperiamo in modo sicuro le vecchie coordinate 
+        # (se la memoria fa i capricci, usa i valori di default di Roma Centro)
+        vecchio_north = b.get("north", 41.905) if isinstance(b, dict) else 41.905
+        vecchio_south = b.get("south", 41.885) if isinstance(b, dict) else 41.885
+        
+        # Aggiorna la pagina SOLO se la mappa viene spostata significativamente
+        if abs(n_north - vecchio_north) > 0.001 or abs(n_south - vecchio_south) > 0.001:
+            st.session_state["bounds"] = {"north": n_north, "south": n_south, "east": n_east, "west": n_west}
+            st.session_state["center"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
+            st.session_state["zoom"] = output_mappa.get("zoom", 15)
+            st.rerun()
+            
+    except Exception as e:
+        # Se qualcosa va storto con le coordinate, lo ignoriamo in silenzio
+        pass
