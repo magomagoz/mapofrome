@@ -1,24 +1,817 @@
 {
   "type": "FeatureCollection",
   "features": [
-    {"type": "Feature", "properties": {"nome": "Colosseo", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4922, 41.8902]}},
-    {"type": "Feature", "properties": {"nome": "Pantheon", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4769, 41.8986]}},
-    {"type": "Feature", "properties": {"nome": "Fontana di Trevi", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4833, 41.9009]}},
-    {"type": "Feature", "properties": {"nome": "Castel Sant'Angelo", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4663, 41.9031]}},
-    {"type": "Feature", "properties": {"nome": "Piazza Navona", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4731, 41.8989]}},
-    {"type": "Feature", "properties": {"nome": "Altare della Patria", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4828, 41.8946]}},
-    {"type": "Feature", "properties": {"nome": "Foro Romano", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4853, 41.8925]}},
-    
-    {"type": "Feature", "properties": {"nome": "Basilica di San Pietro", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4534, 41.9022]}},
-    {"type": "Feature", "properties": {"nome": "Pantheon (Santa Maria ad Martyres)", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4769, 41.8986]}},
-    {"type": "Feature", "properties": {"nome": "Basilica di Santa Maria Maggiore", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4985, 41.8975]}},
-    {"type": "Feature", "properties": {"nome": "Chiesa del Gesù", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4798, 41.8959]}},
-    {"type": "Feature", "properties": {"nome": "San Luigi dei Francesi", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4747, 41.8996]}},
-    
-    {"type": "Feature", "properties": {"nome": "Hotel de Russie (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4764, 41.9101]}},
-    {"type": "Feature", "properties": {"nome": "The St. Regis Rome (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4944, 41.9032]}},
-    {"type": "Feature", "properties": {"nome": "Hotel Hassler Roma (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4824, 41.9065]}},
-    {"type": "Feature", "properties": {"nome": "Singer Palace Hotel (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4811, 41.8992]}},
-    {"type": "Feature", "properties": {"nome": "Anantara Palazzo Naiadi (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4962, 41.9028]}}
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Colosseo",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4922,
+          41.8902
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Pantheon",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4769,
+          41.8986
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Fontana di Trevi",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4833,
+          41.9009
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Castel Sant'Angelo",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4663,
+          41.9031
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Piazza Navona",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4731,
+          41.8989
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Altare della Patria",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4828,
+          41.8946
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Foro Romano",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4853,
+          41.8925
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Piazza di Spagna",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4828,
+          41.9057
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Piazza del Popolo",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4764,
+          41.9107
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Campo de' Fiori",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.472,
+          41.8956
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Circo Massimo",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4853,
+          41.886
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Bocca della Verit\u00e0",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4813,
+          41.8877
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Terme di Caracalla",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4926,
+          41.8799
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Piramide Cestia",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4808,
+          41.8765
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Arco di Costantino",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4905,
+          41.8902
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Palazzo del Quirinale",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4873,
+          41.8999
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Villa Borghese",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4862,
+          41.9129
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Isola Tiberina",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4779,
+          41.8904
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Terrazza del Gianicolo",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4608,
+          41.8915
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Mura Aureliane (Porta Pinciana)",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4883,
+          41.9099
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Teatro di Marcello",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4798,
+          41.8919
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Mercati di Traiano",
+        "tipo": "monumento"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4852,
+          41.8957
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Basilica di San Pietro",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4534,
+          41.9022
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Basilica di Santa Maria Maggiore",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4985,
+          41.8975
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Arcibasilica di San Giovanni in Laterano",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.5057,
+          41.8859
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Basilica di San Paolo fuori le mura",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4768,
+          41.8586
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Chiesa del Ges\u00f9",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4798,
+          41.8959
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "San Luigi dei Francesi",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4747,
+          41.8996
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Santa Maria del Popolo",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4766,
+          41.9112
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Santa Maria in Trastevere",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4697,
+          41.8894
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Santa Maria della Vittoria",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4944,
+          41.9045
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "San Pietro in Vincoli",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4934,
+          41.8939
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Santa Maria sopra Minerva",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4781,
+          41.8979
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Basilica di San Clemente",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4975,
+          41.8894
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Sant'Andrea della Valle",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4745,
+          41.8966
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Santa Maria della Pace",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4715,
+          41.9000
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "San Pietro in Montorio",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4664,
+          41.8884
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Trinit\u00e0 dei Monti",
+        "tipo": "chiesa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4832,
+          41.9061
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Hotel de Russie (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4764,
+          41.9101
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "The St. Regis Rome (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4944,
+          41.9032
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Hotel Hassler Roma (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4824,
+          41.9065
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Singer Palace Hotel (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4811,
+          41.8992
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Anantara Palazzo Naiadi (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4962,
+          41.9028
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Rocco Forte Hotel de la Ville (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4831,
+          41.9066
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "J.K. Place Roma (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.477,
+          41.9042
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Baglioni Hotel Regina (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4918,
+          41.9063
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Sofitel Roma Villa Borghese (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4886,
+          41.9074
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "NH Collection Roma Fori Imperiali (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4838,
+          41.8958
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Hotel Eden (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4878,
+          41.9056
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Sina Bernini Bristol (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4884,
+          41.9039
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Portrait Roma (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4795,
+          41.9051
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "The First Arte (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4755,
+          41.908
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Hotel Splendide Royal (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4869,
+          41.9069
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Grand Hotel Palace (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4908,
+          41.9054
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Hotel Indigo Rome - St. George (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4632,
+          41.8973
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Palazzo Manfredi (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4957,
+          41.8898
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "Elizabeth Unique Hotel (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4772,
+          41.9068
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nome": "The Pantheon Iconic Rome Hotel (5\u2605)",
+        "tipo": "hotel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4774,
+          41.8992
+        ]
+      }
+    }
   ]
 }
