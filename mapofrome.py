@@ -1,14 +1,14 @@
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
-import requests
-import time
+import json
+import os
 
 # Configurazione schermo intero per iPad Pro
 st.set_page_config(layout="wide")
 
-st.title("🗺️ Mappa di Roma (Con Indicatore di Caricamento)")
-st.write("Spostati sulla mappa. Sotto di essa troverai il pulsante per caricare i dati in tempo reale.")
+st.title("🗺️ Mappa di Roma (Database Locale Super-Veloce)")
+st.write("Spostati sulla mappa e premi il pulsante per caricare i monumenti, le chiese e gli hotel reali presenti in quella zona.")
 
 # --- 1. CONFIGURAZIONE TOGGLE ---
 col1, col2, col3 = st.columns(3)
@@ -29,56 +29,36 @@ if "mappa_centro" not in st.session_state:
 if "mappa_zoom" not in st.session_state:
     st.session_state["mappa_zoom"] = 15
 
-# --- 3. ESTRAZIONE DATI DA OVERPASS ---
-def scarica_dati_api(north, south, east, west):
-    punti_trovati = []
-    overpass_url = "https://overpass.kumi.systems/api/interpreter"
+# --- 3. LETTURA DATI LOCALE (A prova di blocchi di rete) ---
+def carica_punti_locali(north, south, east, west):
+    punti_filtrati = []
+    file_path = "punti_roma.geojson"
     
-    overpass_query = f"""
-    [out:json][timeout:25];
-    (
-      nwr["tourism"="hotel"]({south},{west},{north},{east});
-      nwr["amenity"="place_of_worship"]({south},{west},{north},{east});
-      nwr["historic"="monument"]({south},{west},{north},{east});
-    );
-    out center;
-    """
-    
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    }
-    
+    # Controlla se il file esiste
+    if not os.path.exists(file_path):
+        st.error(f"File {file_path} non trovato su GitHub! Controlla di averlo creato.")
+        return []
+        
     try:
-        response = requests.get(overpass_url, params={'data': overpass_query}, headers=headers, timeout=20)
-        if response.status_code == 200:
-            data = response.json()
-            for element in data.get('elements', []):
-                lat = element.get('lat') or element.get('center', {}).get('lat')
-                lon = element.get('lon') or element.get('center', {}).get('lon')
-                if lat and lon:
-                    tags = element.get('tags', {})
-                    nome = tags.get('name') or 'Struttura'
-                    
-                    if tags.get('tourism') == 'hotel':
-                        tipo = 'hotel'
-                    elif tags.get('amenity') == 'place_of_worship':
-                        tipo = 'chiesa'
-                    else:
-                        tipo = 'monumento'
-                        
-                    punti_trovati.append({'coords': [float(lat), float(lon)], 'nome': str(nome), 'tipo': tipo})
-    except Exception:
-        pass # Se fallisce, useremo i dati di test sotto
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        for feature in data.get("features", []):
+            coords = feature["geometry"]["coordinates"] # [lon, lat] nel formato GeoJSON
+            lon, lat = coords[0], coords[1]
+            props = feature["properties"]
+            
+            # Filtra i punti: li prende solo se sono dentro l'area visibile dell'iPad
+            if south <= lat <= north and west <= lon <= east:
+                punti_filtrati.append({
+                    'coords': [lat, lon],
+                    'nome': props["nome"],
+                    'tipo': props["tipo"]
+                })
+    except Exception as e:
+        st.error(f"Errore nella lettura del file dei dati: {e}")
         
-    # --- LOGICA DI EMERGENZA (Se il server restituisce 0 punti, carichiamo punti fissi di test) ---
-    if len(punti_trovati) == 0:
-        punti_trovati = [
-            {'coords': [41.8902, 12.4922], 'nome': '🚨 TEST: Il Colosseo (Verifica Grafica)', 'tipo': 'monumento'},
-            {'coords': [41.8986, 12.4769], 'nome': '🚨 TEST: Il Pantheon (Verifica Grafica)', 'tipo': 'chiesa'},
-            {'coords': [41.9015, 12.4900], 'nome': '🚨 TEST: Grand Hotel (Verifica Grafica)', 'tipo': 'hotel'}
-        ]
-        
-    return punti_trovati
+    return punti_filtrati
 
 # --- 4. COSTRUZIONE MAPPA FOLLIUM ---
 m = folium.Map(
@@ -87,7 +67,7 @@ m = folium.Map(
     tiles='CartoDB voyager'
 )
 
-# Disegna i punti memorizzati
+# Disegna i punti approvati dai toggle
 for p in st.session_state["punti_salvati"]:
     if p['tipo'] == 'hotel' and mostra_hotel:
         folium.CircleMarker(location=p['coords'], radius=8, color='#DAA520', fill=True, fill_color='#FFD700', fill_opacity=0.9, tooltip=p['nome']).add_to(m)
@@ -100,46 +80,40 @@ for p in st.session_state["punti_salvati"]:
 output_mappa = st_folium(
     m, 
     width="100%", 
-    height=500, 
-    key="mappa_roma_ottimizzata_caricamento",
+    height=550, 
+    key="mappa_roma_locale",
     returned_objects=["bounds", "center", "zoom"]
 )
 
-# Salva la posizione corrente dello schermo ad ogni tocco o zoom
+# Salva la posizione dello schermo ad ogni tocco
 if output_mappa and output_mappa.get("bounds") and output_mappa.get("center"):
     st.session_state["mappa_centro"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
     st.session_state["mappa_zoom"] = output_mappa["zoom"]
 
-# --- 6. PULSANTE CON STATO DI CARICAMENTO AVANZATO ---
+# --- 6. PULSANTE CON ANIMAZIONE ---
 st.write("---")
-
-# Estrazione sicura delle coordinate per iPad
 if output_mappa and output_mappa.get("bounds"):
     bounds = output_mappa["bounds"]
-    
-    # Questo metodo garantisce la corretta lettura sia da iPad che da desktop
     try:
         south = bounds["_southWest"]["lat"]
         west = bounds["_southWest"]["lng"]
         north = bounds["_northEast"]["lat"]
         east = bounds["_northEast"]["lng"]
     except KeyError:
-        # Alternativa nel caso in cui le chiavi arrivino con nomi diversi
         south, west = bounds[0][0], bounds[0][1]
         north, east = bounds[1][0], bounds[1][1]
 
-    # Pulsante interattivo: quando viene premuto esegue il blocco 'with st.spinner'
-    # che rende automaticamente grigia l'area e mostra una ruota che gira.
-    if st.button("🚀 Carica elementi in questa zona", use_container_width=True, key="btn_carica"):
-        with st.spinner("⏳ Connessione al database cartografico... Download dei punti in corso..."):
-            # Scarica i dati (reali o di emergenza)
-            punti_scaricati = scarica_dati_api(north, south, east, west)
-            st.session_state["punti_salvati"] = punti_scaricati
-            time.sleep(0.5) # Piccolo delay per permettere all'iPad di elaborare la grafica
+    if st.button("🚀 Carica elementi in questa zona", use_container_width=True):
+        with st.spinner("⏳ Elaborazione database locale..."):
+            # Carica i veri dati dal file locale
+            punti_zona = carica_punti_locali(north, south, east, west)
+            st.session_state["punti_salvati"] = punti_zona
             
-        st.success(f"Aggiornato! Visualizzati {len(punti_scaricati)} elementi sulla mappa.")
+        if len(punti_zona) > 0:
+            st.success(f"Fatto! Trovati {len(punti_zona)} elementi reali in questa vista.")
+        else:
+            st.info("Nessun elemento del database presente in questa inquadratura. Prova a spostarti verso il centro (es. Colosseo o Pantheon).")
         st.rerun()
 
-# Stato attuale dei dati stampato in piccolo sotto
 if len(st.session_state["punti_salvati"]) > 0:
-    st.caption(f"📍 Indicatori pronti sulla mappa: {len(st.session_state['punti_salvati'])}")
+    st.caption(f"📍 Indicatori attivi sulla mappa: {len(st.session_state['punti_salvati'])}")
