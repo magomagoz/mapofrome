@@ -7,7 +7,7 @@ import os
 # Configurazione schermo intero per iPad Pro
 st.set_page_config(layout="wide")
 
-st.title("🗺️ Mappa di Roma (Database Locale Super-Veloce)")
+st.title("🗺️ Mappa di Roma per NCC")
 st.write("Spostati sulla mappa e premi il pulsante per caricare i monumenti, le chiese e gli hotel reali presenti in quella zona.")
 
 # --- 1. CONFIGURAZIONE TOGGLE CON COLORI ---
