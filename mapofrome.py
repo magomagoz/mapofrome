@@ -10,14 +10,17 @@ st.set_page_config(layout="wide")
 st.title("🗺️ Mappa di Roma (Database Locale Super-Veloce)")
 st.write("Spostati sulla mappa e premi il pulsante per caricare i monumenti, le chiese e gli hotel reali presenti in quella zona.")
 
-# --- 1. CONFIGURAZIONE TOGGLE ---
+# --- 1. CONFIGURAZIONE TOGGLE CON COLORI ---
 col1, col2, col3 = st.columns(3)
 with col1:
-    mostra_hotel = st.toggle("🌟 Hotel (4/5 Stelle)", value=True)
+    # Giallo/Arancione per gli Hotel
+    mostra_hotel = st.toggle("🟡 :orange[**Hotel (4/5 Stelle)**]", value=True)
 with col2:
-    mostra_chiese = st.toggle("⛪ Chiese", value=True)
+    # Rosso per le Chiese
+    mostra_chiese = st.toggle("🔴 :red[**Chiese**]", value=True)
 with col3:
-    mostra_monumenti = st.toggle("🏛️ Monumenti", value=True)
+    # Blu per i Monumenti
+    mostra_monumenti = st.toggle("🔵 :blue[**Monumenti**]", value=True)
 
 st.divider()
 
