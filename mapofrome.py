@@ -3,44 +3,44 @@ import folium
 from streamlit_folium import st_folium
 import requests
 
+# Sfrutta lo schermo dell'iPad Pro al massimo
 st.set_page_config(layout="wide")
 
-st.title("🗺️ Mappa Cartografica di Roma (Diagnostica)")
-st.write("Vediamo esattamente cosa sta succedendo dietro le quinte.")
+st.title("🗺️ Mappa di Roma - Versione Stabile")
+st.write("Naviga liberamente sulla mappa. Usa gli interruttori per mostrare o nascondere i dati senza perdere la posizione.")
 
-# --- 1. PANNELLO DI CONTROLLO CON TASTO RESET ---
+# --- 1. PANNELLO DI CONTROLLO ---
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    mostra_hotel = st.toggle("🌟 Hotel (4 e 5 Stelle)", value=False)
+    mostra_hotel = st.toggle("🌟 Hotel (4 e 5 Stelle)", value=True)
 with col2:
-    mostra_chiese = st.toggle("⛪ Chiese", value=False)
+    mostra_chiese = st.toggle("⛪ Chiese", value=True)
 with col3:
-    mostra_monumenti = st.toggle("🏛️ Monumenti", value=False)
+    mostra_monumenti = st.toggle("🏛️ Monumenti", value=True)
 with col4:
-    # Questo tasto è fondamentale per forzare il server a riscaricare i dati
-    if st.button("🔄 Svuota Cache e Ricarica"):
+    if st.button("🔄 Forza Aggiornamento Dati"):
         st.cache_data.clear()
         st.rerun()
 
 st.divider()
 
-# --- 2. GESTIONE DELLA POSIZIONE INIZIALE ---
-if "bounds" not in st.session_state:
-    st.session_state["bounds"] = {"north": 41.905, "south": 41.885, "east": 12.495, "west": 12.475}
+# --- 2. STATO DELLA SESSIONE (Previene i reset della mappa) ---
+# Usiamo coordinate ampie di partenza per Roma Centro
 if "center" not in st.session_state:
     st.session_state["center"] = [41.8955, 12.4823]
 if "zoom" not in st.session_state:
-    st.session_state["zoom"] = 16
+    st.session_state["zoom"] = 15
+if "bounds" not in st.session_state:
+    st.session_state["bounds"] = {"north": 41.905, "south": 41.885, "east": 12.495, "west": 12.475}
 
-# --- 3. ESTRAZIONE DATI CON MESSAGGI DI ERRORE ESPLICITI ---
-@st.cache_data(show_spinner="Download dati da OpenStreetMap...")
-def scarica_punti_rapidi(north, south, east, west):
+# --- 3. ESTRAZIONE DATI OTTIMIZZATA (Risolve Errore 406) ---
+@st.cache_data(show_spinner="Recupero dati da OpenStreetMap...")
+def scarica_punti_sicuri(north, south, east, west):
     punti = []
-    # IMPORTANTE: Ora usiamo HTTPS per non essere bloccati dal cloud
     overpass_url = "https://overpass-api.de/api/interpreter"
     
     overpass_query = f"""
-    [out:json][timeout:25];
+    [out:json][timeout:30];
     (
       nwr["tourism"="hotel"]["stars"~"4|5"]({south},{west},{north},{east});
       nwr["amenity"="place_of_worship"]({south},{west},{north},{east});
@@ -49,12 +49,19 @@ def scarica_punti_rapidi(north, south, east, west):
     out center;
     """
     
+    # AGGIUNTA FONDAMENTALE: Definiamo l'header per evitare il blocco 406 dei server
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) StreamlitRomeMapApp/1.0'
+    }
+    
     try:
-        response = requests.get(overpass_url, params={'data': overpass_query})
+        response = requests.get(overpass_url, params={'data': overpass_query}, headers=headers)
         
-        # Se il server Overpass rifiuta la connessione, ora ce lo dirà
-        if response.status_code != 200:
-            st.error(f"❌ Errore API Overpass (Codice {response.status_code}): Riprova tra poco.")
+        if response.status_code == 429:
+            st.warning("⚠️ Troppe richieste inviate al server. Attendi qualche istante.")
+            return []
+        elif response.status_code != 200:
+            st.error(f"❌ Errore di connessione Overpass: Codice {response.status_code}")
             return []
             
         data = response.json()
@@ -67,7 +74,7 @@ def scarica_punti_rapidi(north, south, east, west):
                 continue
                 
             tags = element.get('tags', {})
-            nome = tags.get('name', 'Senza nome')
+            nome = tags.get('name', 'Struttura senza nome')
             
             if tags.get('tourism') == 'hotel':
                 tipo = 'hotel'
@@ -76,58 +83,64 @@ def scarica_punti_rapidi(north, south, east, west):
             else:
                 tipo = 'monumento'
                 
-            # Forziamo la conversione in float (numero decimale) per sicurezza di Folium
             punti.append({'coords': [float(lat), float(lon)], 'nome': nome, 'tipo': tipo})
             
     except Exception as e:
-        st.error(f"❌ Errore di esecuzione: {e}")
+        st.error(f"❌ Errore generico: {e}")
         
     return punti
 
-# --- 4. PREPARAZIONE DELLA MAPPA ---
+# --- 4. COSTRUZIONE DELLA MAPPA CON I DATI DELLA SESSIONE ---
+# Creiamo la mappa inserendo l'ultima posizione valida salvata in memoria
+m = folium.Map(
+    location=st.session_state["center"], 
+    zoom_start=st.session_state["zoom"], 
+    tiles='CartoDB voyager'
+)
+
 b = st.session_state["bounds"]
-m = folium.Map(location=st.session_state["center"], zoom_start=st.session_state["zoom"], tiles='CartoDB voyager')
 
+# Estraiamo i dati solo per l'area attualmente registrata nella sessione
 if abs(b["north"] - b["south"]) < 0.08:
-    punti = scarica_punti_rapidi(b["north"], b["south"], b["east"], b["west"])
+    lista_punti = scarica_punti_sicuri(b["north"], b["south"], b["east"], b["west"])
     
-    # Questo messaggio ci farà capire se il problema è la rete (0 punti) o il rendering
-    st.caption(f"📍 Diagnostica: Trovati {len(punti)} elementi cartografici in quest'area visibile.")
+    st.caption(f"📍 Elementi rilevati nella zona: {len(lista_punti)}")
     
-    for p in punti:
+    for p in lista_punti:
         if p['tipo'] == 'hotel' and mostra_hotel:
-            folium.CircleMarker(location=p['coords'], radius=6, color='#DAA520', fill=True, fill_opacity=0.9, tooltip=p['nome']).add_to(m)
+            folium.CircleMarker(location=p['coords'], radius=6, color='#DAA520', fill=True, fill_color='#FFD700', fill_opacity=0.9, tooltip=p['nome']).add_to(m)
         elif p['tipo'] == 'chiesa' and mostra_chiese:
-            folium.CircleMarker(location=p['coords'], radius=5, color='#8B0000', fill=True, fill_opacity=0.8, tooltip=p['nome']).add_to(m)
+            folium.CircleMarker(location=p['coords'], radius=5, color='#8B0000', fill=True, fill_color='#DC143C', fill_opacity=0.8, tooltip=p['nome']).add_to(m)
         elif p['tipo'] == 'monumento' and mostra_monumenti:
-            folium.CircleMarker(location=p['coords'], radius=5, color='#00008B', fill=True, fill_opacity=0.8, tooltip=p['nome']).add_to(m)
+            folium.CircleMarker(location=p['coords'], radius=5, color='#00008B', fill=True, fill_color='#1E90FF', fill_opacity=0.8, tooltip=p['nome']).add_to(m)
 else:
-    st.info("🔍 L'area visibile è troppo vasta. Fai zoom per far comparire i punti d'interesse!")
+    st.info("🔍 Zoomando più da vicino verranno scaricati automaticamente i punti d'interesse.")
 
-# --- 5. MOSTRA LA MAPPA A SCHERMO ---
-output_mappa = st_folium(m, width="100%", height=650, key="mappa_roma_diagnostica")
+# --- 5. VISUALIZZAZIONE DELLA MAPPA ---
+# st_folium ora gestisce l'interfaccia in modo asincrono senza generare loop continui
+output_mappa = st_folium(
+    m, 
+    width="100%", 
+    height=600, 
+    key="mappa_roma_stabile",
+    returned_objects=["bounds", "center", "zoom"] # Chiediamo solo i dati strettamente necessari
+)
 
-# --- 6. AGGIORNAMENTO DINAMICO SULLO SPOSTAMENTO (A PROVA DI CRASH) ---
-if output_mappa and output_mappa.get("bounds"):
-    try:
-        nuovi_bounds = output_mappa["bounds"]
-        n_north = nuovi_bounds["_northEast"]["lat"]
-        n_south = nuovi_bounds["_southWest"]["lat"]
-        n_east = nuovi_bounds["_northEast"]["lng"]
-        n_west = nuovi_bounds["_southWest"]["lng"]
-        
-        # Recuperiamo in modo sicuro le vecchie coordinate 
-        # (se la memoria fa i capricci, usa i valori di default di Roma Centro)
-        vecchio_north = b.get("north", 41.905) if isinstance(b, dict) else 41.905
-        vecchio_south = b.get("south", 41.885) if isinstance(b, dict) else 41.885
-        
-        # Aggiorna la pagina SOLO se la mappa viene spostata significativamente
-        if abs(n_north - vecchio_north) > 0.001 or abs(n_south - vecchio_south) > 0.001:
-            st.session_state["bounds"] = {"north": n_north, "south": n_south, "east": n_east, "west": n_west}
-            st.session_state["center"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
-            st.session_state["zoom"] = output_mappa.get("zoom", 15)
-            st.rerun()
-            
-    except Exception as e:
-        # Se qualcosa va storto con le coordinate, lo ignoriamo in silenzio
-        pass
+# --- 6. AGGIORNAMENTO TRACCIATO DELLA SESSIONE ---
+# Raccogliamo la nuova posizione dell'utente SOLO se si ferma o cambia area, evitando il loop di st.rerun()
+if output_mappa and output_mappa.get("bounds") and output_mappa.get("center"):
+    nuovi_bounds = output_mappa["bounds"]
+    n_north = nuovi_bounds["_northEast"]["lat"]
+    n_south = nuovi_bounds["_southWest"]["lat"]
+    n_east = nuovi_bounds["_northEast"]["lng"]
+    n_west = nuovi_bounds["_southWest"]["lng"]
+    
+    # Controlliamo se c'è stato uno spostamento reale e significativo prima di aggiornare lo stato
+    vecchio_b = st.session_state["bounds"]
+    scostamento = abs(n_north - vecchio_b["north"]) + abs(n_south - vecchio_b["south"])
+    
+    if scostamento > 0.002: # Tolleranza per evitare i micro-aggiornamenti durante lo zoom
+        st.session_state["bounds"] = {"north": n_north, "south": n_south, "east": n_east, "west": n_west}
+        st.session_state["center"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
+        st.session_state["zoom"] = output_mappa["zoom"]
+        st.rerun()
