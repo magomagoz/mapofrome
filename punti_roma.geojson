@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type": "Feature", "properties": {"nome": "Colosseo", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4922, 41.8902]}},
+    {"type": "Feature", "properties": {"nome": "Pantheon", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4769, 41.8986]}},
+    {"type": "Feature", "properties": {"nome": "Fontana di Trevi", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4833, 41.9009]}},
+    {"type": "Feature", "properties": {"nome": "Castel Sant'Angelo", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4663, 41.9031]}},
+    {"type": "Feature", "properties": {"nome": "Piazza Navona", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4731, 41.8989]}},
+    {"type": "Feature", "properties": {"nome": "Altare della Patria", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4828, 41.8946]}},
+    {"type": "Feature", "properties": {"nome": "Foro Romano", "tipo": "monumento"}, "geometry": {"type": "Point", "coordinates": [12.4853, 41.8925]}},
+    
+    {"type": "Feature", "properties": {"nome": "Basilica di San Pietro", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4534, 41.9022]}},
+    {"type": "Feature", "properties": {"nome": "Pantheon (Santa Maria ad Martyres)", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4769, 41.8986]}},
+    {"type": "Feature", "properties": {"nome": "Basilica di Santa Maria Maggiore", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4985, 41.8975]}},
+    {"type": "Feature", "properties": {"nome": "Chiesa del Gesù", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4798, 41.8959]}},
+    {"type": "Feature", "properties": {"nome": "San Luigi dei Francesi", "tipo": "chiesa"}, "geometry": {"type": "Point", "coordinates": [12.4747, 41.8996]}},
+    
+    {"type": "Feature", "properties": {"nome": "Hotel de Russie (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4764, 41.9101]}},
+    {"type": "Feature", "properties": {"nome": "The St. Regis Rome (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4944, 41.9032]}},
+    {"type": "Feature", "properties": {"nome": "Hotel Hassler Roma (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4824, 41.9065]}},
+    {"type": "Feature", "properties": {"nome": "Singer Palace Hotel (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4811, 41.8992]}},
+    {"type": "Feature", "properties": {"nome": "Anantara Palazzo Naiadi (5★)", "tipo": "hotel"}, "geometry": {"type": "Point", "coordinates": [12.4962, 41.9028]}}
+  ]
+}
