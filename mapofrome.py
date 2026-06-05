@@ -7,6 +7,7 @@ import os
 # Configurazione schermo intero per iPad Pro
 st.set_page_config(layout="wide")
 
+st.image("banner.png")
 st.title("🗺️ Mappa di Roma per NCC")
 st.write("Spostati sulla mappa e premi il pulsante per caricare i monumenti, le chiese e gli hotel reali presenti in quella zona.")
 
