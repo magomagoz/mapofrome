@@ -14,13 +14,10 @@ st.write("Spostati sulla mappa e premi il pulsante per caricare i monumenti, le 
 # --- 1. CONFIGURAZIONE TOGGLE CON COLORI ---
 col1, col2, col3 = st.columns(3)
 with col1:
-    # Giallo/Arancione per gli Hotel
     mostra_hotel = st.toggle("🟡 :orange[**Hotel (4/5 Stelle)**]", value=True)
 with col2:
-    # Rosso per le Chiese
     mostra_chiese = st.toggle("🔴 :red[**Chiese**]", value=True)
 with col3:
-    # Blu per i Monumenti
     mostra_monumenti = st.toggle("🔵 :blue[**Monumenti**]", value=True)
 
 st.divider()
@@ -28,17 +25,12 @@ st.divider()
 # --- 2. STATO DELLA SESSIONE ---
 if "punti_salvati" not in st.session_state:
     st.session_state["punti_salvati"] = []
-if "mappa_centro" not in st.session_state:
-    st.session_state["mappa_centro"] = [41.8955, 12.4823]
-if "mappa_zoom" not in st.session_state:
-    st.session_state["mappa_zoom"] = 15
 
-# --- 3. LETTURA DATI LOCALE (A prova di blocchi di rete) ---
+# --- 3. LETTURA DATI LOCALE ---
 def carica_punti_locali(north, south, east, west):
     punti_filtrati = []
     file_path = "punti_roma.geojson"
     
-    # Controlla se il file esiste
     if not os.path.exists(file_path):
         st.error(f"File {file_path} non trovato su GitHub! Controlla di averlo creato.")
         return []
@@ -48,53 +40,49 @@ def carica_punti_locali(north, south, east, west):
             data = json.load(f)
             
         for feature in data.get("features", []):
-            coords = feature["geometry"]["coordinates"] # [lon, lat] nel formato GeoJSON
+            coords = feature["geometry"]["coordinates"] 
             lon, lat = coords[0], coords[1]
             props = feature["properties"]
             
-            # Filtra i punti: li prende solo se sono dentro l'area visibile dell'iPad
             if south <= lat <= north and west <= lon <= east:
-                punti_filtrati.append({
-                    'coords': [lat, lon],
-                    'nome': props["nome"],
-                    'tipo': props["tipo"]
-                })
+                punti_filtrati.append({'coords': [lat, lon], 'nome': props["nome"], 'tipo': props["tipo"]})
     except Exception as e:
-        st.error(f"Errore nella lettura del file dei dati: {e}")
+        st.error(f"Errore nella lettura del file: {e}")
         
     return punti_filtrati
 
-# --- 4. COSTRUZIONE MAPPA FOLLIUM ---
-m = folium.Map(
-    location=st.session_state["mappa_centro"], 
-    zoom_start=st.session_state["mappa_zoom"], 
-    tiles='CartoDB voyager'
-)
+# --- 4. MAPPA CONGELATA IN CACHE (Elimina il lampeggio!) ---
+@st.cache_resource
+def crea_mappa_base():
+    # Questa mappa viene generata UNA SOLA VOLTA e non verrà mai più ricaricata
+    return folium.Map(location=[41.8955, 12.4823], zoom_start=14, tiles='CartoDB voyager')
 
-# Disegna i punti approvati dai toggle
+# Recuperiamo la mappa "congelata"
+m = crea_mappa_base()
+
+# Creiamo un "foglio trasparente" (FeatureGroup) dove appoggiare i marker
+livello_punti = folium.FeatureGroup(name="Punti NCC")
+
+# Disegniamo i punti SOLO sul foglio trasparente, non sulla mappa base
 for p in st.session_state["punti_salvati"]:
     if p['tipo'] == 'hotel' and mostra_hotel:
-        folium.CircleMarker(location=p['coords'], radius=8, color='#DAA520', fill=True, fill_color='#FFD700', fill_opacity=0.9, tooltip=p['nome']).add_to(m)
+        folium.CircleMarker(location=p['coords'], radius=8, color='#DAA520', fill=True, fill_color='#FFD700', fill_opacity=0.9, tooltip=p['nome']).add_to(livello_punti)
     elif p['tipo'] == 'chiesa' and mostra_chiese:
-        folium.CircleMarker(location=p['coords'], radius=7, color='#8B0000', fill=True, fill_color='#DC143C', fill_opacity=0.8, tooltip=p['nome']).add_to(m)
+        folium.CircleMarker(location=p['coords'], radius=7, color='#8B0000', fill=True, fill_color='#DC143C', fill_opacity=0.8, tooltip=p['nome']).add_to(livello_punti)
     elif p['tipo'] == 'monumento' and mostra_monumenti:
-        folium.CircleMarker(location=p['coords'], radius=7, color='#00008B', fill=True, fill_color='#1E90FF', fill_opacity=0.8, tooltip=p['nome']).add_to(m)
+        folium.CircleMarker(location=p['coords'], radius=7, color='#00008B', fill=True, fill_color='#1E90FF', fill_opacity=0.8, tooltip=p['nome']).add_to(livello_punti)
 
-# --- 5. VISUALIZZAZIONE DELLA MAPPA ---
+# --- 5. VISUALIZZAZIONE MAPPA DINAMICA ---
 output_mappa = st_folium(
     m, 
+    feature_group_to_add=livello_punti, # Passiamo il livello trasparente a Streamlit
     width="100%", 
     height=550, 
-    key="mappa_roma_locale",
-    returned_objects=["bounds", "center", "zoom"]
+    key="mappa_roma_fluida",
+    returned_objects=["bounds"] # Ora ci interessano SOLO i bordi, non il centro!
 )
 
-# Salva la posizione dello schermo ad ogni tocco
-if output_mappa and output_mappa.get("bounds") and output_mappa.get("center"):
-    st.session_state["mappa_centro"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
-    st.session_state["mappa_zoom"] = output_mappa["zoom"]
-
-# --- 6. PULSANTE CON ANIMAZIONE ---
+# --- 6. PULSANTE E LOGICA ---
 st.write("---")
 if output_mappa and output_mappa.get("bounds"):
     bounds = output_mappa["bounds"]
@@ -109,14 +97,13 @@ if output_mappa and output_mappa.get("bounds"):
 
     if st.button("🚀 Carica elementi in questa zona", use_container_width=True):
         with st.spinner("⏳ Elaborazione database locale..."):
-            # Carica i veri dati dal file locale
             punti_zona = carica_punti_locali(north, south, east, west)
             st.session_state["punti_salvati"] = punti_zona
             
         if len(punti_zona) > 0:
-            st.success(f"Fatto! Trovati {len(punti_zona)} elementi reali in questa vista.")
+            st.success(f"Fatto! Trovati {len(punti_zona)} elementi in quest'area.")
         else:
-            st.info("Nessun elemento del database presente in questa inquadratura. Prova a spostarti verso il centro (es. Colosseo o Pantheon).")
+            st.info("Nessun elemento presente in questa inquadratura. Spostati o zooma indietro.")
         st.rerun()
 
 if len(st.session_state["punti_salvati"]) > 0:
