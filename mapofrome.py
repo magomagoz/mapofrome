@@ -4,7 +4,7 @@ from streamlit_folium import st_folium
 import json
 import os
 
-# Configurazione schermo intero per iPad Pro
+# Configurazione schermo intero
 st.set_page_config(layout="wide")
 
 st.image("banner.png")
@@ -51,19 +51,14 @@ def carica_punti_locali(north, south, east, west):
         
     return punti_filtrati
 
-# --- 4. MAPPA CONGELATA IN CACHE (Elimina il lampeggio!) ---
-@st.cache_resource
-def crea_mappa_base():
-    # Questa mappa viene generata UNA SOLA VOLTA e non verrà mai più ricaricata
-    return folium.Map(location=[41.8955, 12.4823], zoom_start=14, tiles='CartoDB voyager')
-
-# Recuperiamo la mappa "congelata"
-m = crea_mappa_base()
+# --- 4. COSTRUZIONE MAPPA BASE ---
+# Abbiamo rimosso la cache! Ora la mappa non collasserà più.
+m = folium.Map(location=[41.8955, 12.4823], zoom_start=14, tiles='CartoDB voyager')
 
 # Creiamo un "foglio trasparente" (FeatureGroup) dove appoggiare i marker
 livello_punti = folium.FeatureGroup(name="Punti NCC")
 
-# Disegniamo i punti SOLO sul foglio trasparente, non sulla mappa base
+# Disegniamo i punti SOLO sul foglio trasparente
 for p in st.session_state["punti_salvati"]:
     if p['tipo'] == 'hotel' and mostra_hotel:
         folium.CircleMarker(location=p['coords'], radius=8, color='#DAA520', fill=True, fill_color='#FFD700', fill_opacity=0.9, tooltip=p['nome']).add_to(livello_punti)
@@ -75,11 +70,11 @@ for p in st.session_state["punti_salvati"]:
 # --- 5. VISUALIZZAZIONE MAPPA DINAMICA ---
 output_mappa = st_folium(
     m, 
-    feature_group_to_add=livello_punti, # Passiamo il livello trasparente a Streamlit
-    width="100%", 
-    height=550, 
+    feature_group_to_add=livello_punti,
+    use_container_width=True, # Garantisce la larghezza a tutto schermo su ogni device
+    height=600, # Forza un'altezza abbondante e blocca l'effetto "fessura"
     key="mappa_roma_fluida",
-    returned_objects=["bounds"] # Ora ci interessano SOLO i bordi, non il centro!
+    returned_objects=["bounds"]
 )
 
 # --- 6. PULSANTE E LOGICA ---
