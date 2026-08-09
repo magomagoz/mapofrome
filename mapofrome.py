@@ -1,6 +1,5 @@
-import streamlit as st
+ import streamlit as st
 import folium
-from folium import plugins # <-- NUOVO IMPORT per i plugin di Folium
 from streamlit_folium import st_folium
 import json
 import os
@@ -10,7 +9,7 @@ st.set_page_config(layout="wide")
 
 st.image("banner.png")
 st.title("🗺️ Mappa di Roma per NCC")
-st.write("Spostati sulla mappa o usa il **Mirino GPS** in alto a sinistra per trovare la tua posizione, poi carica i punti.")
+st.write("Spostati sulla mappa e premi il pulsante per caricare i monumenti, le chiese e gli hotel reali presenti in quella zona.")
 
 # --- 1. CONFIGURAZIONE TOGGLE CON COLORI ---
 col1, col2, col3 = st.columns(3)
@@ -26,16 +25,11 @@ st.divider()
 # --- 2. STATO DELLA SESSIONE ---
 if "punti_salvati" not in st.session_state:
     st.session_state["punti_salvati"] = []
-# Memorizziamo la posizione per non perdere il focus dopo aver usato il GPS
-if "mappa_centro" not in st.session_state:
-    st.session_state["mappa_centro"] = [41.8955, 12.4823]
-if "mappa_zoom" not in st.session_state:
-    st.session_state["mappa_zoom"] = 14
 
 # --- 3. LETTURA DATI LOCALE ---
 def carica_punti_locali(north, south, east, west):
     punti_filtrati = []
-    file_path = "punti_roma.geojson" # Assicurati di usare il nome del tuo file più corposo
+    file_path = "punti_roma.geojson"
     
     if not os.path.exists(file_path):
         st.error(f"File {file_path} non trovato su GitHub! Controlla di averlo creato.")
@@ -57,23 +51,11 @@ def carica_punti_locali(north, south, east, west):
         
     return punti_filtrati
 
-# --- 4. COSTRUZIONE MAPPA BASE CON GPS ---
-# La mappa ora si avvia leggendo le coordinate memorizzate nella sessione
-m = folium.Map(
-    location=st.session_state["mappa_centro"], 
-    zoom_start=st.session_state["mappa_zoom"], 
-    tiles='CartoDB voyager'
-)
+# --- 4. COSTRUZIONE MAPPA BASE ---
+# Abbiamo rimosso la cache! Ora la mappa non collasserà più.
+m = folium.Map(location=[41.8955, 12.4823], zoom_start=14, tiles='CartoDB voyager')
 
-# IL NUOVO PULSANTE GPS (LocateControl)
-plugins.LocateControl(
-    position="topleft",
-    drawCircle=True, # Disegna un cerchio blu attorno alla tua posizione
-    flyTo=True,      # Animazione fluida verso il punto
-    strings={"title": "Centra sulla mia posizione GPS", "popup": "Ti trovi qui!"}
-).add_to(m)
-
-# Creiamo il foglio trasparente per i marker
+# Creiamo un "foglio trasparente" (FeatureGroup) dove appoggiare i marker
 livello_punti = folium.FeatureGroup(name="Punti NCC")
 
 # Disegniamo i punti SOLO sul foglio trasparente
@@ -89,17 +71,11 @@ for p in st.session_state["punti_salvati"]:
 output_mappa = st_folium(
     m, 
     feature_group_to_add=livello_punti,
-    use_container_width=True, 
-    height=600, 
+    use_container_width=True, # Garantisce la larghezza a tutto schermo su ogni device
+    height=600, # Forza un'altezza abbondante e blocca l'effetto "fessura"
     key="mappa_roma_fluida",
-    # Abbiamo aggiunto center e zoom per poter salvare l'ultima vista scelta dall'utente
-    returned_objects=["bounds", "center", "zoom"] 
+    returned_objects=["bounds"]
 )
-
-# Registra la posizione aggiornata non appena muovi la mappa o usi il GPS
-if output_mappa and output_mappa.get("center"):
-    st.session_state["mappa_centro"] = [output_mappa["center"]["lat"], output_mappa["center"]["lng"]]
-    st.session_state["mappa_zoom"] = output_mappa["zoom"]
 
 # --- 6. PULSANTE E LOGICA ---
 st.write("---")
@@ -115,7 +91,7 @@ if output_mappa and output_mappa.get("bounds"):
         north, east = bounds[1][0], bounds[1][1]
 
     if st.button("🚀 Carica elementi in questa zona", use_container_width=True):
-        with st.spinner("⏳ Estrazione dati per quest'area..."):
+        with st.spinner("⏳ Elaborazione database locale..."):
             punti_zona = carica_punti_locali(north, south, east, west)
             st.session_state["punti_salvati"] = punti_zona
             
